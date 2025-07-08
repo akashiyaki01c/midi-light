@@ -12,6 +12,12 @@ async function sendMidi() {
 	const midiOutput = [...midiOutputs.values()][0];
 
 	{ // 再生処理
+		// 0xB0 = ch1のCC
+		midiOutput.send([0xB0,  1, 0x7f]);
+		midiOutput.send([0xB0,  9, 0x7f]);
+		midiOutput.send([0xB0, 17, 0x7f]);
+		midiOutput.send([0xB0, 25, 0x7f]);
+
 		arrayBufferSource.start();
 		startTime = Date.now();
 	}
@@ -23,10 +29,25 @@ async function sendMidi() {
 		// 時間に達した
 		element.innerHTML += `<div>${JSON.stringify(settings[0])}</div>`;
 		document.querySelector("#frontRight").setAttribute("color", settings[0].frontRight);
-		midiOutput.send([0x90, 60, 0x7f]);
+		const frontRight = parseColor(settings[0].frontRight);
+		midiOutput.send([0xB0,  2, frontRight.r]);
+		midiOutput.send([0xB0,  3, frontRight.g]);
+		midiOutput.send([0xB0,  4, frontRight.b]);
 		document.querySelector("#frontLeft").setAttribute("color", settings[0].frontLeft);
+		const frontLeft = parseColor(settings[0].frontLeft);
+		midiOutput.send([0xB0, 10, frontLeft.r]);
+		midiOutput.send([0xB0, 11, frontLeft.g]);
+		midiOutput.send([0xB0, 12, frontLeft.b]);
 		document.querySelector("#rearRight").setAttribute("color", settings[0].rearRight);
+		const rearRight = parseColor(settings[0].rearRight);
+		midiOutput.send([0xB0, 18, rearRight.r]);
+		midiOutput.send([0xB0, 19, rearRight.g]);
+		midiOutput.send([0xB0, 20, rearRight.b]);
 		document.querySelector("#rearLeft").setAttribute("color", settings[0].rearLeft);
+		const rearLeft = parseColor(settings[0].rearLeft);
+		midiOutput.send([0xB0, 26, rearLeft.r]);
+		midiOutput.send([0xB0, 27, rearLeft.g]);
+		midiOutput.send([0xB0, 28, rearLeft.b]);
 
 		settings.shift();
 	}, 0);
@@ -85,4 +106,21 @@ function parseLightData(data) {
 async function getMIDI() {
 	const midiAccess = await navigator.requestMIDIAccess();
 	return midiAccess.outputs;
+}
+
+/**
+ * 
+ * @param {string} text 
+ */
+function parseColor(text) {
+	if (text.length !== 7) {
+		return {
+			r: 0, g: 0, b: 0,
+		};
+	}
+	const r = Math.min(127, Math.floor(Number.parseInt(text.slice(1, 3), 16) / 2));
+	const g = Math.min(127, Math.floor(Number.parseInt(text.slice(3, 5), 16) / 2));
+	const b = Math.min(127, Math.floor(Number.parseInt(text.slice(5, 7), 16) / 2));
+
+	return { r, g, b };
 }
