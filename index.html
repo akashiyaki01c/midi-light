@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ライトシーケンサー</title>
+    <style>
+      .light-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+			.light {
+        margin: 0.5ric;
+        line-height: 4ric;
+        color: white;
+        text-align: center;
+				background-color: attr(color type(<color>), black);
+      }
+    </style>
+  </head>
+  <body>
+    <button type="button" onclick="sendMidi()">ぼたーん</button>
+    <div class="light-group">
+			<div id="rearLeft" class="light">後左</div>
+      <div id="rearRight" class="light">後右</div>
+      <div id="frontLeft" class="light">前左</div>
+      <div id="frontRight" class="light">前右</div>
+    </div>
+		<div id="output"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
