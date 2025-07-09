@@ -8,25 +8,47 @@
       .light-group {
         display: grid;
         grid-template-columns: 1fr 1fr;
+        height: 50dvh;
+      }
+      #output-outer {
+        height: 5ric;
+        overflow-y: scroll;
       }
 			.light {
         margin: 0.5ric;
-        line-height: 4ric;
         color: white;
         text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 				background-color: attr(color type(<color>), black);
+
+        >span {
+          mix-blend-mode:exclusion;
+          font-size: 2ric;
+        }
       }
     </style>
   </head>
   <body>
     <button type="button" onclick="sendMidi()">ぼたーん</button>
     <div class="light-group">
-			<div id="rearLeft" class="light">後左</div>
-      <div id="rearRight" class="light">後右</div>
-      <div id="frontLeft" class="light">前左</div>
-      <div id="frontRight" class="light">前右</div>
+			<div id="rearLeft" class="light">
+        <span>後左</span>
+      </div>
+      <div id="rearRight" class="light">
+        <span>後右</span>
+      </div>
+      <div id="frontLeft" class="light">
+        <span>前左</span>
+      </div>
+      <div id="frontRight" class="light">
+        <span>前右</span>
+      </div>
     </div>
-		<div id="output"></div>
+		<div id="output-outer">
+      <div id="output"></div>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>
