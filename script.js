@@ -25,36 +25,6 @@ async function sendMidi() {
 			arrayBufferSource.stop();
 			document.querySelector("#button").disabled = false;
 		}
-		/* if (settings[0].time > nowTime) {
-			if (nowData.time + nowData.fadeTime < nowTime) {
-				return;
-			}
-			const elapse = nowTime - nowData.time;
-			const ratio = ease(elapse / nowData.fadeTime || 0);
-
-			const frontRight = interpolationColor(nowData.beforeData.frontRight, nowData.frontRight, ratio);
-			midi.send([0xB0, 2, frontRight.r]);
-			midi.send([0xB0, 3, frontRight.g]);
-			midi.send([0xB0, 4, frontRight.b]);
-			document.querySelector("#frontRight").setAttribute("color", toHex(frontRight));
-			const frontLeft = interpolationColor(nowData.beforeData.frontLeft, nowData.frontLeft, ratio);
-			midi.send([0xB0, 10, frontLeft.r]);
-			midi.send([0xB0, 11, frontLeft.g]);
-			midi.send([0xB0, 12, frontLeft.b]);
-			document.querySelector("#frontLeft").setAttribute("color", toHex(frontLeft));
-			const rearRight = interpolationColor(nowData.beforeData.rearRight, nowData.rearRight, ratio);
-			midi.send([0xB0, 18, rearRight.r]);
-			midi.send([0xB0, 19, rearRight.g]);
-			midi.send([0xB0, 20, rearRight.b]);
-			document.querySelector("#rearRight").setAttribute("color", toHex(rearRight));
-			const rearLeft = interpolationColor(nowData.beforeData.rearLeft, nowData.rearLeft, ratio);
-			midi.send([0xB0, 26, rearLeft.r]);
-			midi.send([0xB0, 27, rearLeft.g]);
-			midi.send([0xB0, 28, rearLeft.b]);
-			document.querySelector("#rearLeft").setAttribute("color", toHex(rearLeft));
-
-			return;
-		} */
 		if (settings[0].time > nowTime) {
 			return;
 		}
@@ -64,25 +34,9 @@ async function sendMidi() {
 
 		nowData = settings.shift();
 
-		/* const frontRight = nowData.frontRight;
-		midi.send([0xB0, 2, frontRight.r]);
-		midi.send([0xB0, 3, frontRight.g]);
-		midi.send([0xB0, 4, frontRight.b]); */
 		document.querySelector("#frontRight").setAttribute("color", toHex(frontRight));
-		/* const frontLeft = nowData.frontLeft;
-		midi.send([0xB0, 10, frontLeft.r]);
-		midi.send([0xB0, 11, frontLeft.g]);
-		midi.send([0xB0, 12, frontLeft.b]); */
 		document.querySelector("#frontLeft").setAttribute("color", toHex(frontLeft));
-		/* const rearRight = nowData.rearRight;
-		midi.send([0xB0, 18, rearRight.r]);
-		midi.send([0xB0, 19, rearRight.g]);
-		midi.send([0xB0, 20, rearRight.b]); */
 		document.querySelector("#rearRight").setAttribute("color", toHex(rearRight));
-		/* const rearLeft = nowData.rearLeft;
-		midi.send([0xB0, 26, rearLeft.r]);
-		midi.send([0xB0, 27, rearLeft.g]);
-		midi.send([0xB0, 28, rearLeft.b]); */
 		document.querySelector("#rearLeft").setAttribute("color", toHex(rearLeft))
 		midi.send([0x90, 11 + nowData.sceneIndex, 127]);
 		console.log(nowData);
