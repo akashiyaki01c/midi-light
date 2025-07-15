@@ -1,70 +1,91 @@
 async function sendMidi() {
 	let startTime = 0;
-	const midiOutputs = await getMIDI();
 	const arrayBufferSource = await getAudioBufferSource(await getMp3ArrayBuffer("./data/BLACK SHOUT.mp3"));
-	let settings = parseLightData(await (await fetch("./data/settings.tsv")).text()).sort((a, b) => a.time - b.time);
-	const element = document.querySelector("#output");
+	let settings = parseLightData(await (await fetch("./settings.tsv")).text()).sort((a, b) => a.time - b.time);
 	let intervalId = 0;
 
-	if (midiOutputs.size == 0) {
-		element.innerHTML += `<div>MIDIがなかったよーん</div>`;
-		return;
-	}
-	const midiOutput = [...midiOutputs.values()][0];
+	const midi = new EasyMidi(await EasyMidi.initValue());
 
 	{ // 再生処理
-		// 0xB0 = ch1のCC
-		midiOutput.send([0xB0, 1, 0x7f]);
-		midiOutput.send([0xB0, 9, 0x7f]);
-		midiOutput.send([0xB0, 17, 0x7f]);
-		midiOutput.send([0xB0, 25, 0x7f]);
 
 		arrayBufferSource.start();
 		startTime = Date.now();
+		document.querySelector("#button").disabled = true;
 	}
 
 	let nowData = new LightData();
+	let i = 0;
 
 	const interval = () => {
+		i++;
 		const nowTime = Date.now() - startTime;
 		if (settings.length === 0) {
 			/// 終了処理
 			clearInterval(intervalId);
 			arrayBufferSource.stop();
+			document.querySelector("#button").disabled = false;
 		}
-		if (settings[0].time > nowTime) {
+		/* if (settings[0].time > nowTime) {
 			if (nowData.time + nowData.fadeTime < nowTime) {
 				return;
 			}
 			const elapse = nowTime - nowData.time;
-			const ratio = elapse / nowData.fadeTime || 0;
-			console.log(elapse, ratio);
+			const ratio = ease(elapse / nowData.fadeTime || 0);
 
 			const frontRight = interpolationColor(nowData.beforeData.frontRight, nowData.frontRight, ratio);
-			midiOutput.send([0xB0, 2, frontRight.r]);
-			midiOutput.send([0xB0, 3, frontRight.g]);
-			midiOutput.send([0xB0, 4, frontRight.b]);
+			midi.send([0xB0, 2, frontRight.r]);
+			midi.send([0xB0, 3, frontRight.g]);
+			midi.send([0xB0, 4, frontRight.b]);
 			document.querySelector("#frontRight").setAttribute("color", toHex(frontRight));
 			const frontLeft = interpolationColor(nowData.beforeData.frontLeft, nowData.frontLeft, ratio);
-			midiOutput.send([0xB0, 10, frontLeft.r]);
-			midiOutput.send([0xB0, 11, frontLeft.g]);
-			midiOutput.send([0xB0, 12, frontLeft.b]);
+			midi.send([0xB0, 10, frontLeft.r]);
+			midi.send([0xB0, 11, frontLeft.g]);
+			midi.send([0xB0, 12, frontLeft.b]);
 			document.querySelector("#frontLeft").setAttribute("color", toHex(frontLeft));
 			const rearRight = interpolationColor(nowData.beforeData.rearRight, nowData.rearRight, ratio);
-			midiOutput.send([0xB0, 18, rearRight.r]);
-			midiOutput.send([0xB0, 19, rearRight.g]);
-			midiOutput.send([0xB0, 20, rearRight.b]);
+			midi.send([0xB0, 18, rearRight.r]);
+			midi.send([0xB0, 19, rearRight.g]);
+			midi.send([0xB0, 20, rearRight.b]);
 			document.querySelector("#rearRight").setAttribute("color", toHex(rearRight));
 			const rearLeft = interpolationColor(nowData.beforeData.rearLeft, nowData.rearLeft, ratio);
-			midiOutput.send([0xB0, 26, rearLeft.r]);
-			midiOutput.send([0xB0, 27, rearLeft.g]);
-			midiOutput.send([0xB0, 28, rearLeft.b]);
+			midi.send([0xB0, 26, rearLeft.r]);
+			midi.send([0xB0, 27, rearLeft.g]);
+			midi.send([0xB0, 28, rearLeft.b]);
 			document.querySelector("#rearLeft").setAttribute("color", toHex(rearLeft));
 
 			return;
+		} */
+		if (settings[0].time > nowTime) {
+			return;
 		}
 
+		const elapse = nowTime - nowData.time;
+		const ratio = ease(elapse / nowData.fadeTime || 0);
+
 		nowData = settings.shift();
+
+		/* const frontRight = nowData.frontRight;
+		midi.send([0xB0, 2, frontRight.r]);
+		midi.send([0xB0, 3, frontRight.g]);
+		midi.send([0xB0, 4, frontRight.b]); */
+		document.querySelector("#frontRight").setAttribute("color", toHex(frontRight));
+		/* const frontLeft = nowData.frontLeft;
+		midi.send([0xB0, 10, frontLeft.r]);
+		midi.send([0xB0, 11, frontLeft.g]);
+		midi.send([0xB0, 12, frontLeft.b]); */
+		document.querySelector("#frontLeft").setAttribute("color", toHex(frontLeft));
+		/* const rearRight = nowData.rearRight;
+		midi.send([0xB0, 18, rearRight.r]);
+		midi.send([0xB0, 19, rearRight.g]);
+		midi.send([0xB0, 20, rearRight.b]); */
+		document.querySelector("#rearRight").setAttribute("color", toHex(rearRight));
+		/* const rearLeft = nowData.rearLeft;
+		midi.send([0xB0, 26, rearLeft.r]);
+		midi.send([0xB0, 27, rearLeft.g]);
+		midi.send([0xB0, 28, rearLeft.b]); */
+		document.querySelector("#rearLeft").setAttribute("color", toHex(rearLeft))
+		midi.send([0x90, 11 + nowData.sceneIndex, 127]);
+		console.log(nowData);
 	};
 	intervalId = setInterval(interval, 0);
 }
@@ -120,6 +141,7 @@ function parseLightData(data) {
 			rearLeft: cells[4], // 後左ライト色
 			fadeTime: Number.parseInt(cells[5]), // 切換時間
 			beforeData: result[result.length - 1] || null, // 前のデータ
+			sceneIndex: Number.parseInt(cells[6]), // インデックス
 		});
 	}
 	return result;
@@ -130,15 +152,10 @@ function interpolationColor(a, b, ratio) {
 	const bColor = parseColor(b);
 
 	return {
-		r: aColor.r * (1 - ratio) + bColor.r * ratio,
-		g: aColor.g * (1 - ratio) + bColor.g * ratio,
-		b: aColor.b * (1 - ratio) + bColor.b * ratio,
+		r: Math.floor(aColor.r * (1 - ratio) + bColor.r * ratio),
+		g: Math.floor(aColor.g * (1 - ratio) + bColor.g * ratio),
+		b: Math.floor(aColor.b * (1 - ratio) + bColor.b * ratio),
 	};
-}
-
-async function getMIDI() {
-	const midiAccess = await navigator.requestMIDIAccess();
-	return midiAccess.outputs;
 }
 
 /**
@@ -170,4 +187,9 @@ class LightData {
 	rearLeft = "#000000";
 	fadeTime = 0;
 	beforeData = null;
+	sceneIndex = 0;
+}
+
+function ease(x) {
+	return 1 - Math.pow(1 - x, 3);
 }

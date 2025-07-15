@@ -31,7 +31,7 @@
     </style>
   </head>
   <body>
-    <button type="button" onclick="sendMidi()">ぼたーん</button>
+    <button id="button" type="button" onclick="sendMidi()">ぼたーん</button>
     <div class="light-group">
 			<div id="rearLeft" class="light">
         <span>後左</span>
@@ -49,6 +49,7 @@
 		<div id="output-outer">
       <div id="output"></div>
     </div>
+    <script src="easymidi.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
