@@ -7,7 +7,6 @@ async function sendMidi() {
 	const midi = new EasyMidi(await EasyMidi.initValue());
 
 	{ // 再生処理
-
 		arrayBufferSource.start();
 		startTime = Date.now();
 		document.querySelector("#button").disabled = true;
@@ -29,16 +28,15 @@ async function sendMidi() {
 			return;
 		}
 
-		const elapse = nowTime - nowData.time;
-		const ratio = ease(elapse / nowData.fadeTime || 0);
-
 		nowData = settings.shift();
 
 		document.querySelector("#frontRight").setAttribute("color", toHex(frontRight));
 		document.querySelector("#frontLeft").setAttribute("color", toHex(frontLeft));
 		document.querySelector("#rearRight").setAttribute("color", toHex(rearRight));
-		document.querySelector("#rearLeft").setAttribute("color", toHex(rearLeft))
-		midi.send([0x90, 11 + nowData.sceneIndex, 127]);
+		document.querySelector("#rearLeft").setAttribute("color", toHex(rearLeft));
+		
+		midi.sendBank(29);
+		midi.sendScene(nowData.sceneIndex);
 		console.log(nowData);
 	};
 	intervalId = setInterval(interval, 0);
